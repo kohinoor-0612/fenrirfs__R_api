@@ -1,0 +1,48 @@
+---
+title: "FenrirFS API 開發待辦清單"
+author: "庫依努"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+## ✅ 核心資料表設計與開發待辦
+
+本份文件整理了與 FenrirFS 整合 API 開發的基礎任務，針對標籤、檔案與標籤對應關係等三個主要資料表，規劃必要查詢、API 行為與實作方向。
+
+---
+
+### 📌 1. `labels` — 標籤主表
+
+| 欄位名           | 說明             |
+|------------------|------------------|
+| LabelID          | 主鍵，整數型     |
+| LabelName        | 標籤名稱         |
+| LabelColorName   | 顯示顏色名稱     |
+| GroupId          | 分群 ID          |
+| Guid             | 全域唯一 ID      |
+| LastModified     | 最後修改時間戳記 |
+| AutoSyncGenerated| 同步標記欄位     |
+
+#### 🧩 待辦：
+
+- [ ] 使用 SQL 讀取該表，篩出常用欄位（如上）
+- [ ] 封裝成 R 函數 `get_useful_labels(con)`
+- [ ] 提供對應 API 端點 `/labels` → 回傳 JSON
+
+---
+
+### 📌 2. `files` + `labeledfiles` — 檔案與標籤的關聯
+
+`files` 表存放檔案基本資訊，`labeledfiles` 則建立 `FileID` 與 `LabelID` 的多對多對應關係。
+
+#### 🧩 待辦：
+
+- [ ] 查詢 `labeledfiles` 結構：是否為 `FileID`, `LabelID`
+- [ ] 查詢 `files` 結構（建議限制輸出欄位如 FileName, Path, Exists, ModifiedTime 等）
+- [ ] 建立 SQL join：
+  
+  ```sql
+  SELECT f.*, l.LabelID, l.LabelName, l.LabelColorName
+  FROM labeledfiles lf
+  JOIN files f ON lf.FileID = f.FileID
+  JOIN labels l ON lf.LabelID = l.LabelID
